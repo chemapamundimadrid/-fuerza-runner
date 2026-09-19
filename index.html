@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071827"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Fuerza Runner</title>
+<style>
+*{box-sizing:border-box}:root{--bg:#071827;--card:#0f263a;--line:#294b64;--text:#f8fafc;--muted:#9fb3c8;--blue:#0ea5e9;--green:#22c55e}
+body{margin:0;background:linear-gradient(#071827,#0a1d2d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:calc(16px + env(safe-area-inset-top)) 12px calc(30px + env(safe-area-inset-bottom))}main{max-width:860px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}h1{margin:0;font-size:1.45rem;font-style:italic}h1 em{color:var(--blue)}header p{margin:3px 0 0;color:var(--muted);font-size:.82rem}.total{text-align:right}.total strong{font-size:1.2rem;display:block}.total small{color:var(--muted)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:9px}.tab,.modebtn{border:1px solid var(--line);background:#10263b;color:white;border-radius:10px;padding:10px;font-weight:850}.tab.active,.modebtn.active{background:#0877b8}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}.panel{display:none}.panel.active{display:block}.dayhead{display:flex;justify-content:space-between;align-items:end;gap:10px}.dayhead h2{font-size:1.04rem;margin:0}.dayhead p{margin:3px 0;color:var(--muted);font-size:.75rem}.dayhead>div:last-child{text-align:right}.dayhead small{color:var(--muted);display:block}.bar{height:8px;background:#18364e;border-radius:99px;overflow:hidden;margin:7px 0 12px}.bar i{display:block;height:100%;background:var(--blue);width:0;transition:.2s}h4{color:#b9e7fb;text-transform:uppercase;font-size:.72rem;letter-spacing:.08em}
+.exercise{display:grid;grid-template-columns:34px 1fr 40px;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0}.badge{width:30px;height:30px;border-radius:50%;background:#0284c7;display:grid;place-items:center;font-weight:900}.name{font-size:.93rem;margin:0}.home-name{display:none}.exercise p{color:var(--muted);font-size:.72rem;margin:2px 0}.compare{margin-top:7px}.visual{text-align:center}.home-vis{display:none}.art{background:#091824;border:1px solid #294b64;border-radius:8px;overflow:hidden}.art svg{display:block;width:100%;height:110px}.visual small{font-size:.68rem;color:#dbeafe}.dose{display:flex;gap:8px;align-items:center;margin-top:7px}.dose strong{background:#1b3a51;padding:6px 8px;border-radius:7px}.dose span{color:var(--muted);font-size:.72rem}.video{display:inline-block;margin-top:7px;background:#0472b7;color:white;text-decoration:none;padding:7px 9px;border-radius:7px;font-size:.72rem;font-weight:800}
+.check{display:grid;place-items:center}.check input,.run-item input{position:absolute;opacity:0}.check span,.run-check{width:31px;height:31px;border:2px solid #f8fafc;border-radius:7px;display:grid;place-items:center;color:transparent;font-weight:900}.check input:checked+span,.run-item input:checked+.run-check{background:var(--green);border-color:var(--green);color:white}.exercise.done{opacity:.55}
+body.home-mode .gym-name,body.home-mode .gym-vis{display:none}body.home-mode .home-name,body.home-mode .home-vis{display:block}
+.running{margin-top:11px;border:1px solid #7c3aed;background:#17153a;border-radius:12px;padding:10px}.running h3{margin:0 0 8px;color:#c4b5fd;font-size:.88rem}.rungrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.run-item{position:relative;display:grid;grid-template-columns:28px 1fr;column-gap:7px;align-items:center;background:#102036;border-radius:8px;padding:8px}.run-check{grid-row:1/3;width:24px;height:24px}.run-item b{font-size:.73rem}.run-item small{color:var(--muted);font-size:.67rem}
+.complete{width:100%;margin-top:11px;background:linear-gradient(135deg,#2dcc69,#159947);border:0;color:white;padding:13px;border-radius:10px;font-weight:900;font-size:.95rem}.history{margin-top:15px;background:#10263b;border:1px solid var(--line);border-radius:11px;padding:10px}.history h3{margin:0 0 6px;font-size:.9rem}.history p{margin:4px 0;color:var(--muted);font-size:.73rem}
+@media(min-width:700px){.compare{max-width:360px}.rungrid{grid-template-columns:repeat(4,1fr)}}
+</style></head>
+<body><main>
+<header><div><h1>🏃 FUERZA <em>RUNNER</em></h1><p>Más fuerza. Mejores kilómetros.</p></div><div class="total"><strong id="total">0</strong><small>marcados</small></div></header>
+<div class="tabs"><button class="tab active" data-tab="1">DÍA 1</button><button class="tab" data-tab="2">DÍA 2</button><button class="tab" data-tab="3">DÍA 3</button></div>
+<div class="mode"><button class="modebtn active" data-mode="gym">🏋️ Gimnasio</button><button class="modebtn" data-mode="home">🏠 Casa · Gomas</button></div>
+
+    <section class="panel" id="day1" data-day="1">
+      <div class="dayhead"><div><h2>Día 1 · Fuerza base</h2><p>Cuádriceps · glúteos · gemelos · core</p></div><div><small>Progreso</small><strong id="score1">0/10</strong></div></div>
+      <div class="bar"><i id="bar1"></i></div>
+      <h4>Ejercicios de fuerza</h4>
+      
+        <article class="exercise" data-key="d1e1">
+          <div class="badge">1</div>
+          <div class="body">
+            <h3 class="name gym-name">Sentadilla con barra</h3><h3 class="name home-name">Sentadilla con goma</h3>
+            <p>Cuádriceps · glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="45" y1="39" x2="108" y2="39" stroke="#94a3b8" stroke-width="5"/><circle cx="41" cy="39" r="8" fill="#64748b"/><circle cx="112" cy="39" r="8" fill="#64748b"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Sentadilla con goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 8</strong><span>Descanso 90 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Sentadilla+con+barra+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e1"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d1e2">
+          <div class="badge">2</div>
+          <div class="body">
+            <h3 class="name gym-name">Prensa de piernas</h3><h3 class="name home-name">Sentadilla pisando goma</h3>
+            <p>Cuádriceps · glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Sentadilla pisando goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 10</strong><span>Descanso 90 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Prensa+de+piernas+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e2"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d1e3">
+          <div class="badge">3</div>
+          <div class="body">
+            <h3 class="name gym-name">Curl femoral tumbado</h3><h3 class="name home-name">Curl femoral con goma</h3>
+            <p>Isquiosurales</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Curl femoral con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 12</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Curl+femoral+tumbado+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e3"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d1e4">
+          <div class="badge">4</div>
+          <div class="body">
+            <h3 class="name gym-name">Hip Thrust</h3><h3 class="name home-name">Hip Thrust con banda</h3>
+            <p>Glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><line x1="45" y1="39" x2="108" y2="39" stroke="#94a3b8" stroke-width="5"/><circle cx="41" cy="39" r="8" fill="#64748b"/><circle cx="112" cy="39" r="8" fill="#64748b"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Hip Thrust con banda</small></div>
+            </div>
+            <div class="dose"><strong>4 × 10</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Hip+Thrust+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e4"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d1e5">
+          <div class="badge">5</div>
+          <div class="body">
+            <h3 class="name gym-name">Elevación de talones</h3><h3 class="name home-name">Elevación talones con goma</h3>
+            <p>Gemelos · sóleo</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Elevación talones con goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 15</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Elevación+de+talones+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e5"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d1e6">
+          <div class="badge">6</div>
+          <div class="body">
+            <h3 class="name gym-name">Press Pallof</h3><h3 class="name home-name">Pallof con goma</h3>
+            <p>Core · estabilidad</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Pallof con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 12/lado</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Press+Pallof+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d1e6"><span>✓</span></label>
+        </article>
+      <div class="running"><h3>🏃 Bloque running · 10 min</h3><div class="rungrid"><label class="run-item"><input type="checkbox" data-check="d1r1"><span class="run-check">✓</span><b>A-Skip</b><small>3 × 20 m</small></label><label class="run-item"><input type="checkbox" data-check="d1r2"><span class="run-check">✓</span><b>Skipping alto</b><small>3 × 20 m</small></label><label class="run-item"><input type="checkbox" data-check="d1r3"><span class="run-check">✓</span><b>Zancadas caminando</b><small>2 × 20 m</small></label><label class="run-item"><input type="checkbox" data-check="d1r4"><span class="run-check">✓</span><b>Trote suave</b><small>5 min</small></label></div></div>
+      <button class="complete" data-daycomplete="1">✓ Completar Día 1</button>
+    </section>
+    <section class="panel" id="day2" data-day="2">
+      <div class="dayhead"><div><h2>Día 2 · Cadena posterior</h2><p>Isquios · glúteos · espalda · sóleo · core</p></div><div><small>Progreso</small><strong id="score2">0/10</strong></div></div>
+      <div class="bar"><i id="bar2"></i></div>
+      <h4>Ejercicios de fuerza</h4>
+      
+        <article class="exercise" data-key="d2e1">
+          <div class="badge">1</div>
+          <div class="body">
+            <h3 class="name gym-name">Peso muerto rumano</h3><h3 class="name home-name">Peso muerto con goma</h3>
+            <p>Isquios · glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="45" y1="39" x2="108" y2="39" stroke="#94a3b8" stroke-width="5"/><circle cx="41" cy="39" r="8" fill="#64748b"/><circle cx="112" cy="39" r="8" fill="#64748b"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Peso muerto con goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 8</strong><span>Descanso 90 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Peso+muerto+rumano+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e1"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d2e2">
+          <div class="badge">2</div>
+          <div class="body">
+            <h3 class="name gym-name">Curl femoral sentado</h3><h3 class="name home-name">Curl femoral con goma</h3>
+            <p>Isquios</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Curl femoral con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 12</strong><span>Descanso 75 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Curl+femoral+sentado+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e2"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d2e3">
+          <div class="badge">3</div>
+          <div class="body">
+            <h3 class="name gym-name">Sóleo sentado</h3><h3 class="name home-name">Sóleo con goma</h3>
+            <p>Sóleo</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Sóleo con goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 15</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Sóleo+sentado+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e3"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d2e4">
+          <div class="badge">4</div>
+          <div class="body">
+            <h3 class="name gym-name">Remo sentado</h3><h3 class="name home-name">Remo con goma</h3>
+            <p>Espalda · postura</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Remo con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 12</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Remo+sentado+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e4"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d2e5">
+          <div class="badge">5</div>
+          <div class="body">
+            <h3 class="name gym-name">Hip Thrust</h3><h3 class="name home-name">Hip Thrust con goma</h3>
+            <p>Glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><line x1="45" y1="39" x2="108" y2="39" stroke="#94a3b8" stroke-width="5"/><circle cx="41" cy="39" r="8" fill="#64748b"/><circle cx="112" cy="39" r="8" fill="#64748b"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Hip Thrust con goma</small></div>
+            </div>
+            <div class="dose"><strong>4 × 10</strong><span>Descanso 75 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Hip+Thrust+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e5"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d2e6">
+          <div class="badge">6</div>
+          <div class="body">
+            <h3 class="name gym-name">Dead Bug</h3><h3 class="name home-name">Dead Bug</h3>
+            <p>Core</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Dead Bug</small></div>
+            </div>
+            <div class="dose"><strong>3 × 10/lado</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Dead+Bug+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d2e6"><span>✓</span></label>
+        </article>
+      <div class="running"><h3>🏃 Bloque running · 10 min</h3><div class="rungrid"><label class="run-item"><input type="checkbox" data-check="d2r1"><span class="run-check">✓</span><b>Pasos rápidos</b><small>3 × 20 s</small></label><label class="run-item"><input type="checkbox" data-check="d2r2"><span class="run-check">✓</span><b>Rebotes tobillo</b><small>2 × 20</small></label><label class="run-item"><input type="checkbox" data-check="d2r3"><span class="run-check">✓</span><b>Skipping bajo</b><small>3 × 20 m</small></label><label class="run-item"><input type="checkbox" data-check="d2r4"><span class="run-check">✓</span><b>Trote fácil</b><small>6 min</small></label></div></div>
+      <button class="complete" data-daycomplete="2">✓ Completar Día 2</button>
+    </section>
+    <section class="panel" id="day3" data-day="3">
+      <div class="dayhead"><div><h2>Día 3 · Estabilidad y potencia</h2><p>Unilateral · cadera · pantorrilla · técnica</p></div><div><small>Progreso</small><strong id="score3">0/10</strong></div></div>
+      <div class="bar"><i id="bar3"></i></div>
+      <h4>Ejercicios de fuerza</h4>
+      
+        <article class="exercise" data-key="d3e1">
+          <div class="badge">1</div>
+          <div class="body">
+            <h3 class="name gym-name">Step-up con mancuernas</h3><h3 class="name home-name">Step-up con goma</h3>
+            <p>Glúteos · cuádriceps</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Step-up con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 10/pierna</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Step-up+con+mancuernas+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e1"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d3e2">
+          <div class="badge">2</div>
+          <div class="body">
+            <h3 class="name gym-name">Zancada atrás</h3><h3 class="name home-name">Zancada con goma</h3>
+            <p>Pierna · glúteos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Zancada con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 10/pierna</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Zancada+atrás+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e2"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d3e3">
+          <div class="badge">3</div>
+          <div class="body">
+            <h3 class="name gym-name">Abductores en máquina</h3><h3 class="name home-name">Monster Walk</h3>
+            <p>Glúteo medio</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Monster Walk</small></div>
+            </div>
+            <div class="dose"><strong>3 × 15/lado</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Abductores+en+máquina+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e3"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d3e4">
+          <div class="badge">4</div>
+          <div class="body">
+            <h3 class="name gym-name">Gemelo unilateral</h3><h3 class="name home-name">Gemelo unilateral con goma</h3>
+            <p>Gemelos</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="52" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="100" y2="47" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="62" y2="83" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="92" y2="83" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Gemelo unilateral con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 15/pierna</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Gemelo+unilateral+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e4"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d3e5">
+          <div class="badge">5</div>
+          <div class="body">
+            <h3 class="name gym-name">Plancha lateral</h3><h3 class="name home-name">Plancha lateral</h3>
+            <p>Core lateral</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><rect x="118" y="28" width="20" height="52" rx="5" fill="#475569"/><line x1="118" y1="50" x2="101" y2="50" stroke="#94a3b8" stroke-width="4"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="118" cy="58" r="7" fill="#f8fafc"/><line x1="111" y1="60" x2="76" y2="66" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="66" x2="50" y2="55" stroke="#f8fafc" stroke-width="6"/><line x1="80" y1="66" x2="52" y2="79" stroke="#f8fafc" stroke-width="6"/><line x1="95" y1="63" x2="88" y2="42" stroke="#f8fafc" stroke-width="5"/><line x1="96" y1="64" x2="103" y2="82" stroke="#f8fafc" stroke-width="5"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Plancha lateral</small></div>
+            </div>
+            <div class="dose"><strong>3 × 35 s/lado</strong><span>Descanso 45 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Plancha+lateral+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e5"><span>✓</span></label>
+        </article>
+        <article class="exercise" data-key="d3e6">
+          <div class="badge">6</div>
+          <div class="body">
+            <h3 class="name gym-name">Sentadilla Goblet</h3><h3 class="name home-name">Sentadilla con goma</h3>
+            <p>Pierna completa</p>
+            <div class="compare">
+              <div class="visual gym-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="45" y1="39" x2="108" y2="39" stroke="#94a3b8" stroke-width="5"/><circle cx="41" cy="39" r="8" fill="#64748b"/><circle cx="112" cy="39" r="8" fill="#64748b"/></svg></div><small>Gimnasio</small></div>
+              <div class="visual home-vis"><div class="art"><svg viewBox="0 0 160 96"><line x1="10" y1="86" x2="150" y2="86" stroke="#334155" stroke-width="2"/><circle cx="78" cy="22" r="8" fill="#f8fafc"/><line x1="78" y1="31" x2="76" y2="57" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/><line x1="76" y1="42" x2="58" y2="50" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="42" x2="95" y2="49" stroke="#f8fafc" stroke-width="5"/><line x1="76" y1="57" x2="55" y2="68" stroke="#f8fafc" stroke-width="6"/><line x1="55" y1="68" x2="65" y2="84" stroke="#f8fafc" stroke-width="6"/><line x1="76" y1="57" x2="97" y2="69" stroke="#f8fafc" stroke-width="6"/><line x1="97" y1="69" x2="105" y2="84" stroke="#f8fafc" stroke-width="6"/><path d="M42 80 Q78 62 116 80" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/></svg></div><small>Sentadilla con goma</small></div>
+            </div>
+            <div class="dose"><strong>3 × 12</strong><span>Descanso 60 s</span></div>
+            <a class="video" href="https://www.youtube.com/results?search_query=Sentadilla+Goblet+tecnica" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          </div>
+          <label class="check"><input type="checkbox" data-check="d3e6"><span>✓</span></label>
+        </article>
+      <div class="running"><h3>🏃 Bloque running · 10 min</h3><div class="rungrid"><label class="run-item"><input type="checkbox" data-check="d3r1"><span class="run-check">✓</span><b>Equilibrio 1 pierna</b><small>2 × 30 s</small></label><label class="run-item"><input type="checkbox" data-check="d3r2"><span class="run-check">✓</span><b>Skipping bajo</b><small>3 × 20 m</small></label><label class="run-item"><input type="checkbox" data-check="d3r3"><span class="run-check">✓</span><b>Progresivos</b><small>4 × 20 s</small></label><label class="run-item"><input type="checkbox" data-check="d3r4"><span class="run-check">✓</span><b>Trote suave</b><small>5 min</small></label></div></div>
+      <button class="complete" data-daycomplete="3">✓ Completar Día 3</button>
+    </section>
+<div class="history"><h3>Historial</h3><div id="history"><p>Aún no has completado ningún día.</p></div></div>
+</main>
+<script>
+const qs=s=>document.querySelector(s), qsa=s=>[...document.querySelectorAll(s)];
+function openDay(n){qsa('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab==n));qsa('.panel').forEach(p=>p.classList.toggle('active',p.dataset.day==n));localStorage.setItem('fr-day',n)}
+qsa('.tab').forEach(b=>b.onclick=()=>openDay(b.dataset.tab));
+function setMode(m){document.body.classList.toggle('home-mode',m==='home');qsa('.modebtn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));localStorage.setItem('fr-mode',m)}
+qsa('.modebtn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+qsa('[data-check]').forEach(c=>{c.checked=localStorage.getItem('fr-'+c.dataset.check)==='1';c.onchange=()=>{localStorage.setItem('fr-'+c.dataset.check,c.checked?'1':'0');update()}});
+function update(){
+ let total=0;
+ [1,2,3].forEach(d=>{let cs=qsa('#day'+d+' [data-check]'),done=cs.filter(c=>c.checked).length;total+=done;qs('#score'+d).textContent=done+'/'+cs.length;qs('#bar'+d).style.width=(done/cs.length*100)+'%';qsa('#day'+d+' .exercise').forEach(a=>{let c=a.querySelector('[data-check]');a.classList.toggle('done',c&&c.checked)})});
+ qs('#total').textContent=total;renderHistory();
+}
+qsa('[data-daycomplete]').forEach(b=>b.onclick=()=>{let d=b.dataset.daycomplete,cs=qsa('#day'+d+' [data-check]');if(!cs.every(c=>c.checked))return alert('Faltan ejercicios por marcar.');let h=JSON.parse(localStorage.getItem('fr-history')||'[]');h.unshift({d,date:new Date().toLocaleString('es-ES')});localStorage.setItem('fr-history',JSON.stringify(h.slice(0,20)));renderHistory();alert('Día '+d+' guardado.')});
+function renderHistory(){let h=JSON.parse(localStorage.getItem('fr-history')||'[]');qs('#history').innerHTML=h.length?h.map(x=>'<p>✓ Día '+x.d+' · '+x.date+'</p>').join(''):'<p>Aún no has completado ningún día.</p>'}
+openDay(localStorage.getItem('fr-day')||'1');setMode(localStorage.getItem('fr-mode')||'gym');update();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+</script></body></html>
