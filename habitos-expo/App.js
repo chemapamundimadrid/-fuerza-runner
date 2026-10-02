@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Share, Switch, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const KEY = 'habitos-v1';
+const DEFAULT_REMIND = { on: false, hour: 21, minute: 0 };
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }),
+});
 const COLORS = ['#22c55e', '#0ea5e9', '#a855f7', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6'];
 const EMOJIS = ['💧', '🏃', '📚', '🧘', '😴', '🥗', '💪', '🚭', '✍️', '💊', '🦷', '☀️'];
 const DN = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
@@ -36,13 +41,47 @@ function App() {
 
   useEffect(() => {
     AsyncStorage.getItem(KEY)
-      .then((v) => v && setData(JSON.parse(v)))
+      .then((v) => v && setData((d) => ({ ...d, ...JSON.parse(v) })))
       .catch(() => {})
       .finally(() => setReady(true));
   }, []);
   useEffect(() => {
     if (ready) AsyncStorage.setItem(KEY, JSON.stringify(data)).catch(() => {});
   }, [data, ready]);
+
+  const remind = data.remind || DEFAULT_REMIND;
+  useEffect(() => {
+    if (!ready) return;
+    (async () => {
+      try {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        if (!remind.on) return;
+        await Notifications.scheduleNotificationAsync({
+          content: { title: 'Hábitos', body: 'Revisa y marca tus hábitos de hoy' },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: remind.hour, minute: remind.minute },
+        });
+      } catch (e) {}
+    })();
+  }, [ready, remind.on, remind.hour, remind.minute]);
+  const setRemind = async (patch) => {
+    if (patch.on) {
+      const p = await Notifications.requestPermissionsAsync();
+      if (!p.granted) { Alert.alert('Permiso denegado', 'Activa las notificaciones en Ajustes del iPhone.'); return; }
+    }
+    setData((d) => ({ ...d, remind: { ...(d.remind || DEFAULT_REMIND), ...patch } }));
+  };
+  const importData = (txt) => {
+    try {
+      const d = JSON.parse(txt);
+      if (!Array.isArray(d.habits) || typeof d.log !== 'object') throw new Error();
+      setData(d);
+      Alert.alert('Importado', `${d.habits.length} hábitos`);
+      return true;
+    } catch (e) {
+      Alert.alert('Datos no válidos');
+      return false;
+    }
+  };
 
   const today = iso(new Date());
   const done = (id, d) => (data.log[d] || []).includes(id);
@@ -163,7 +202,7 @@ function App() {
           }}
         />
       ) : (
-        <Stats habits={data.habits} done={done} sched={sched} streak={streak} best={best} rate={rate} today={today} log={data.log} />
+        <Stats habits={data.habits} done={done} sched={sched} streak={streak} best={best} rate={rate} today={today} log={data.log} remind={remind} setRemind={setRemind} data={data} importData={importData} />
       )}
 
       {tab === 'hoy' && (
@@ -193,9 +232,10 @@ function App() {
   );
 }
 
-function Stats({ habits, done, sched, streak, best, rate, today, log }) {
+function Stats({ habits, done, sched, streak, best, rate, today, log, remind, setRemind, data, importData }) {
+  const [importing, setImporting] = useState(false);
+  const [txt, setTxt] = useState('');
   const cells = useMemo(() => Array.from({ length: 60 }, (_, i) => addDays(today, i - 59)), [today]);
-  if (!habits.length) return <Text style={[s.muted, { textAlign: 'center', marginTop: 80 }]}>Sin datos.</Text>;
   const avg = (n) => habits.reduce((a, h) => a + rate(h, n), 0) / habits.length;
   const total = Object.values(log).reduce((a, l) => a + l.length, 0);
   const box = (v, l) => (
@@ -204,12 +244,12 @@ function Stats({ habits, done, sched, streak, best, rate, today, log }) {
   return (
     <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 120 }}>
       <Text style={[s.h1, { marginBottom: 12 }]}>Estadísticas</Text>
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+      {habits.length > 0 && <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
         {box(`${Math.round(avg(7) * 100)}%`, '7 días')}
         {box(`${Math.round(avg(30) * 100)}%`, '30 días')}
         {box(Math.max(...habits.map(streak)), 'mejor racha')}
         {box(total, 'total')}
-      </View>
+      </View>}
       {habits.map((h) => (
         <View key={h.id} style={[s.card, { flexDirection: 'column', alignItems: 'stretch' }]}>
           <Text style={s.name}>{h.emoji} {h.name}</Text>
@@ -221,6 +261,38 @@ function Stats({ habits, done, sched, streak, best, rate, today, log }) {
           </View>
         </View>
       ))}
+      <View style={[s.card, { flexDirection: 'column', alignItems: 'stretch' }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={s.name}>⏰ Recordatorio diario</Text>
+          <Switch value={remind.on} onValueChange={(on) => setRemind({ on })} />
+        </View>
+        {remind.on && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14, marginTop: 10 }}>
+            <Pressable style={s.navBtn} onPress={() => setRemind({ hour: (remind.hour + 23) % 24 })}><Text style={s.navTxt}>−</Text></Pressable>
+            <Text style={s.h1}>{String(remind.hour).padStart(2, '0')}:{String(remind.minute).padStart(2, '0')}</Text>
+            <Pressable style={s.navBtn} onPress={() => setRemind({ hour: (remind.hour + 1) % 24 })}><Text style={s.navTxt}>+</Text></Pressable>
+            <Pressable style={s.navBtn} onPress={() => setRemind({ minute: (remind.minute + 15) % 60 })}><Text style={s.navTxt}>:15</Text></Pressable>
+          </View>
+        )}
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Pressable style={[s.btn, { backgroundColor: C.card }]} onPress={() => Share.share({ message: JSON.stringify(data) })}><Text style={s.btnTxt}>Exportar</Text></Pressable>
+        <Pressable style={[s.btn, { backgroundColor: C.card }]} onPress={() => setImporting(true)}><Text style={s.btnTxt}>Importar</Text></Pressable>
+      </View>
+      {importing && (
+        <Modal transparent animationType="slide" onRequestClose={() => setImporting(false)}>
+          <Pressable style={s.overlay} onPress={() => setImporting(false)}>
+            <Pressable style={s.sheet} onPress={() => {}}>
+              <Text style={s.label}>Pega aquí el JSON exportado</Text>
+              <TextInput style={[s.input, { height: 140 }]} multiline value={txt} onChangeText={setTxt} autoFocus />
+              <View style={s.row}>
+                <Pressable style={[s.btn, { backgroundColor: C.line }]} onPress={() => setImporting(false)}><Text style={s.btnTxt}>Cancelar</Text></Pressable>
+                <Pressable style={[s.btn, { backgroundColor: '#22c55e' }]} onPress={() => importData(txt) && setImporting(false)}><Text style={[s.btnTxt, { color: '#052e16' }]}>Reemplazar datos</Text></Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      )}
     </ScrollView>
   );
 }
